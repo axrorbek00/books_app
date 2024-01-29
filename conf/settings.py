@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from decouple import config
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,11 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-secret = config('SECRET_KEY')
+# secret = config('SECRET_KEY')
+SECRET_KEY = 'django-insecure-^8!m26c^-%+=qij5^*$uh6cu-h2!d4fc(p-p2cm6&^*3fxdxw!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS'),
+ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
@@ -114,7 +114,25 @@ AUTH_PASSWORD_VALIDATORS = [
             'last_passwords': 5  # Only the last 5 passwords entered by the user
         }
     },
+    {
+        'NAME': 'django_password_validators.password_character_requirements.password_validation.PasswordCharacterValidator',
+        'OPTIONS': {
+            'min_length_digit': 1,
+            'min_length_alpha': 2,
+            'min_length_special': 3,
+            'min_length_lower': 4,
+            'min_length_upper': 5,
+            'special_characters': "~!@#$%^&*()_+{}\":;'[]"
+        }
+    }
+
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -126,6 +144,8 @@ TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 
 USE_TZ = True
+
+AUTH_USER_MODEL = 'users.UserModel'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
