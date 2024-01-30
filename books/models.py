@@ -17,8 +17,12 @@ class AuthorModel(models.Model):
     last_name = models.CharField(max_length=25)
     gender = models.CharField(max_length=10, choices=GenderModel.GENDER_CHOICES)
 
-    def __str__(self):
+    @property
+    def full_name(self):
         return f'{self.name} - {self.last_name}'
+
+    def __str__(self):
+        return self.full_name
 
     class Meta:
         verbose_name = 'Author'
@@ -47,20 +51,8 @@ class PublisherModel(models.Model):  # nashiryot
         verbose_name_plural = 'Publishers'
 
 
-class BookCoverModel(models.Model):  # Muqova
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'{self.name}'
-
-    class Meta:
-        verbose_name = 'Book Coverage'
-        verbose_name_plural = 'Book Coverages'
-
-
 class CategoryModel(models.Model):
     name = models.CharField(max_length=100)
-    count = models.IntegerField(default=0)  # signal yoziw kk
 
     def __str__(self):
         return f'{self.name}'
@@ -70,18 +62,45 @@ class CategoryModel(models.Model):
         verbose_name_plural = 'Categories'
 
 
+class TranslatorModel(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+
+class FeaturesModel(models.Model):
+    COVERS = (  # Muqova
+        (1, 'Hard'),
+        (0, 'Soft'),
+    )
+    PAPER_TYPES = (
+        (1, 'A3'),
+        (2, 'A4'),
+        (3, 'A5'),
+    )
+
+    isbn = models.CharField(max_length=50)
+    language = models.ForeignKey(BookLanguageModel, on_delete=models.CASCADE)
+    write_type = models.CharField(max_length=50)
+    translator = models.ForeignKey(TranslatorModel, on_delete=models.RESTRICT)
+    page_size = models.PositiveIntegerField()
+    publisher = models.ForeignKey(PublisherModel, on_delete=models.RESTRICT)
+    cover = models.IntegerField(choices=COVERS)
+    paper_format = models.IntegerField(choices=PAPER_TYPES)
+    publication_date = models.DateField()
+
+    def __str__(self):
+        return self.isbn
+
+
 class BookModel(models.Model):
     book_name = models.CharField(max_length=100)
-    book_isbn = models.CharField(max_length=50)  # wtrix codi
     main_image = models.ImageField(upload_to='main_image')
-    languages = models.ForeignKey(BookLanguageModel, on_delete=models.CASCADE, related_name='books')
-    publisher = models.ForeignKey(PublisherModel, on_delete=models.CASCADE, related_name='books')
-    book_cover = models.ForeignKey(BookCoverModel, on_delete=models.CASCADE, related_name='books')
-    authors = models.ForeignKey(AuthorModel, on_delete=models.CASCADE, related_name='books')
+    description = models.TextField(blank=True, null=True)
+    authors = models.ForeignKey(AuthorModel, on_delete=models.RESTRICT, related_name='books')
     category = models.ForeignKey(CategoryModel, on_delete=models.CASCADE, related_name='books')
-    type_language = models.CharField(max_length=100)
-    pages_count = models.IntegerField()
-    size = models.CharField(max_length=2)  # A3, A5
     book_created = models.DateField()  # kitobni chiqan yili
     created_at = models.DateTimeField(auto_now_add=True)  # Saytdaga qoyilgan vaqti
     stars = models.FloatField(default=0.0)
@@ -99,7 +118,9 @@ class BookModel(models.Model):
         ],
         blank=True
     )  # chegirma foizi 10%
+    features = models.OneToOneField(FeaturesModel, on_delete=models.RESTRICT)
 
+    @property
     def is_discount(self):
         return bool(self.discount)
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from books.models import (BookModel, PublisherModel, CategoryModel, BookCoverModel, BookLanguageModel,
+from books.models import (BookModel, PublisherModel, CategoryModel, BookLanguageModel, TranslatorModel, FeaturesModel,
                           AuthorModel, BookImageModel)
 
 
@@ -17,15 +17,8 @@ class PublisherAdmin(admin.ModelAdmin):
 
 @admin.register(CategoryModel)
 class CategoryModelAdmin(admin.ModelAdmin):
-    list_display = ('name', 'count')
-    list_display_links = ('name', 'count')
-    readonly_fields = ['count']
-
-
-@admin.register(BookCoverModel)
-class BookCoverAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name')
-    list_display_links = ('id', 'name')
+    list_display = ('name',)
+    list_display_links = ('name',)
 
 
 @admin.register(BookLanguageModel)
@@ -36,6 +29,18 @@ class BookLanguageModelAdmin(admin.ModelAdmin):
 
 class BookImageStackedInline(admin.StackedInline):
     model = BookImageModel
+
+
+@admin.register(TranslatorModel)
+class TranslatorModelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'first_name', 'last_name',)
+    list_display_links = ('id', 'first_name', 'last_name')
+
+
+@admin.register(FeaturesModel)
+class FeaturesAdmin(admin.ModelAdmin):
+    list_display = ('id', 'publisher')
+    list_display_links = ('id', 'publisher')
 
 
 @admin.register(BookModel)

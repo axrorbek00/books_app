@@ -1,12 +1,6 @@
 from rest_framework import serializers
 from books.models import (BookModel, CategoryModel, BookImageModel, AuthorModel, BookLanguageModel,
-                          BookCoverModel, PublisherModel)
-
-
-class BookCoverSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BookCoverModel
-        fields = '__all__'
+                          PublisherModel, FeaturesModel)
 
 
 class BookLanguageSerializer(serializers.ModelSerializer):
@@ -24,7 +18,7 @@ class PublisherSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuthorModel
-        fields = '__all__'
+        fields = ['full_name']
 
 
 class BookImageSerializer(serializers.ModelSerializer):
@@ -33,28 +27,54 @@ class BookImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 
+class FeaturesModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeaturesModel
+        fields = '__all__'
+
+
 class CategorySerializer(serializers.ModelSerializer):
+    count = serializers.SerializerMethodField()
+
+    def get_count(self, obj):
+        return BookModel.objects.filter(category=obj).count()
+
     class Meta:
         model = CategoryModel
-        fields = '__all__'
+        fields = ['name', 'count']
 
 
 class BookSerializer(serializers.ModelSerializer):
+    authors = AuthorSerializer()
+
+    # author = serializers.SerializerMethodField()
+
+    # def get_author(self, obj):
+    #     author = AuthorModel.objects.filter(id=obj.id)
+    #     return author
+
     class Meta:
         model = BookModel
-        fields = ['id', 'main_image', 'book_name', 'authors', 'stars', 'real_price']
+        fields = ['id', 'main_image', 'authors', 'book_name', 'stars', 'price', 'real_price']
 
 
-class BookDetailSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    images = BookImageSerializer(many=True)
-    languages = BookLanguageSerializer()
-    publisher = PublisherSerializer()
-    book_cover = BookCoverSerializer()
+class BookModelDetailSerializer(serializers.ModelSerializer):
     authors = AuthorSerializer()
+    images = BookImageSerializer(many=True)
+    features = FeaturesModelSerializer()
 
     class Meta:
         model = BookModel
         fields = '__all__'
-        extra_fields = ['images']  # modelda image ga book teskari boglangan related name images
-        # extra_fields qoshimcha fild qoshadi
+
+# class BookDetailSerializer(serializers.ModelSerializer):
+#     images = BookImageSerializer(many=True)
+#     languages = BookLanguageSerializer()
+#     publisher = PublisherSerializer()
+#     authors = AuthorSerializer()
+#
+#     class Meta:
+#         model = BookModel
+#         exclude = ['category', 'created_at']
+#         extra_fields = ['images']  # modelda image ga book teskari boglangan related name images
+#         extra_fields qoshimcha fild qoshadi

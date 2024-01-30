@@ -1,24 +1,14 @@
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from .models import (BookModel, CategoryModel, BookImageModel, AuthorModel, BookLanguageModel,
-                     BookCoverModel, PublisherModel)
-from .serializers import BookSerializer, BookDetailSerializer, CategorySerializer, AuthorSerializer, \
-    BookLanguageSerializer, BookCoverSerializer, PublisherSerializer
-
-
-class BookCoverList(ListAPIView):
-    queryset = BookCoverModel.objects.all()
-    serializer_class = BookCoverSerializer
-
-
-class PublisherList(ListAPIView):
-    queryset = PublisherModel.objects.all()
-    serializer_class = PublisherSerializer
-
-
-class CategoryListView(ListAPIView):
-    queryset = CategoryModel.objects.all()
-    serializer_class = CategorySerializer
+                     PublisherModel)
+from .serializers import BookSerializer, CategorySerializer, AuthorSerializer, \
+    BookLanguageSerializer, PublisherSerializer, BookModelDetailSerializer
+from rest_framework import filters
 
 
 class AuthorListView(ListAPIView):
@@ -26,16 +16,38 @@ class AuthorListView(ListAPIView):
     serializer_class = AuthorSerializer
 
 
-class BookLanguageListView(ListAPIView):
-    queryset = BookLanguageModel.objects.all()
-    serializer_class = BookLanguageSerializer
+class CategoryListView(ListAPIView):
+    queryset = CategoryModel.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryDetailView(APIView):
+
+    def get(self, request, pk, *args, **kwargs):
+        qs = BookModel.objects.filter(category_id=pk)
+        serializer = BookSerializer(qs, many=True)
+        return Response(serializer.data)
 
 
 class BookListView(ListAPIView):
-    serializer_class = BookSerializer
+    permission_classes = [AllowAny, ]
     queryset = BookModel.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ('book_name',)
+
+    # def list(self, request, *args, **kwargs):
+    #     queryset = BookModel.objects.all()
+    #     cat_qs = CategoryModel.objects.all()
+    #     serializer = BookSerializer(queryset, many=True)
+    #     cat_serializer = CategorySerializer(cat_qs, many=True)
+    #     return Response({
+    #         "books": serializer.data,
+    #         "cats": cat_serializer.data
+    #     })
 
 
-class BookDetailView(RetrieveAPIView):
-    serializer_class = BookDetailSerializer
+class BookDetailAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny, ]
+    serializer_class = BookModelDetailSerializer
     queryset = BookModel.objects.all()
