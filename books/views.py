@@ -6,19 +6,22 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import (BookModel, CategoryModel, BookImageModel, AuthorModel, BookLanguageModel,
                      PublisherModel)
+from .paginations import BooksPagination
 from .serializers import BookSerializer, CategorySerializer, AuthorSerializer, \
     BookLanguageSerializer, PublisherSerializer, BookModelDetailSerializer
 from rest_framework import filters
 
 
-class AuthorListView(ListAPIView):
-    queryset = AuthorModel.objects.all()
-    serializer_class = AuthorSerializer
-
-
 class CategoryListView(ListAPIView):
     queryset = CategoryModel.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+
+class AuthorListView(ListAPIView):
+    queryset = AuthorModel.objects.all()
+    serializer_class = AuthorSerializer
 
 
 class CategoryDetailView(APIView):
@@ -35,6 +38,7 @@ class BookListView(ListAPIView):
     serializer_class = BookSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ('book_name',)
+    pagination_class = BooksPagination
 
     # def list(self, request, *args, **kwargs):
     #     queryset = BookModel.objects.all()
